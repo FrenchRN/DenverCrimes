@@ -5,8 +5,10 @@
 package it.polito.tdp.crimes;
 
 import java.net.URL;
+import java.util.List;
 import java.util.ResourceBundle;
 
+import it.polito.tdp.crimes.model.Arco;
 import it.polito.tdp.crimes.model.Model;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -25,16 +27,16 @@ public class FXMLController {
     private URL location;
 
     @FXML // fx:id="boxCategoria"
-    private ComboBox<?> boxCategoria; // Value injected by FXMLLoader
+    private ComboBox<String> boxCategoria; // Value injected by FXMLLoader
 
     @FXML // fx:id="boxMese"
-    private ComboBox<?> boxMese; // Value injected by FXMLLoader
+    private ComboBox<Integer> boxMese; // Value injected by FXMLLoader
 
     @FXML // fx:id="btnAnalisi"
     private Button btnAnalisi; // Value injected by FXMLLoader
 
     @FXML // fx:id="boxArco"
-    private ComboBox<?> boxArco; // Value injected by FXMLLoader
+    private ComboBox<Arco> boxArco; // Value injected by FXMLLoader
 
     @FXML // fx:id="btnPercorso"
     private Button btnPercorso; // Value injected by FXMLLoader
@@ -44,12 +46,33 @@ public class FXMLController {
 
     @FXML
     void doCalcolaPercorso(ActionEvent event) {
-
+    	txtResult.clear();
+    	Arco a = this.boxArco.getValue();
+    	if(a == null) {
+    		txtResult.appendText("Seleziona arco!");
+    		return;
+    	}
+    	List<String> percorso = this.model.trovaPercorso(a.getOf1(), a.getOf2());
+    	txtResult.appendText("Percorso migliore: \n\n");
+    	for(String v : percorso) {
+    		txtResult.appendText(v + "\n");
+    	}
     }
 
     @FXML
     void doCreaGrafo(ActionEvent event) {
-
+    	txtResult.clear();
+    	String categoria = boxCategoria.getValue();
+    	Integer mese = boxMese.getValue();
+    	if(categoria == null || mese == null) {
+    		txtResult.appendText("Perfavore scegli categoria e mese");
+    		return ;
+    	}
+    	else{
+    		this.model.creaGrafo(categoria, mese);
+    		txtResult.appendText("Vertici: " + this.model.nVertex() + " Archi: " + this.model.nArchi()+"\n");
+    		txtResult.appendText(this.model.stampaArchiMaggiori());
+    	}
     }
 
     @FXML // This method is called by the FXMLLoader when initialization is complete
@@ -65,5 +88,7 @@ public class FXMLController {
     
     public void setModel(Model model) {
     	this.model = model;
+    	boxCategoria.getItems().addAll(this.model.getCategorie());
+    	boxMese.getItems().addAll(this.model.getMesi());
     }
 }
